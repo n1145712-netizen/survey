@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>青年族群投資理財與購屋、退休規劃問卷</title>
+<style>
+  :root {
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --ink: #1f2733;
+    --muted: #5d6878;
+    --line: #dde2ea;
+    --accent: #1d5fa8;
+    --accent-soft: #e6effa;
+    --warn: #b3261e;
+    --warn-soft: #fdecea;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", "Heiti TC", sans-serif;
+    font-size: 16px; line-height: 1.65;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 16px 48px; }
+
+  .progress {
+    position: sticky; top: 0; z-index: 5; background: var(--bg);
+    padding: 10px 0 8px; margin: 0 -16px; padding-left: 16px; padding-right: 16px;
+  }
+  .progress-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .bar { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .bar > span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .25s; }
+
+  header.intro { background: var(--card); border-radius: var(--radius); padding: 22px 20px; margin-top: 8px; border-top: 5px solid var(--accent); }
+  .school { font-size: 13px; color: var(--muted); letter-spacing: .04em; }
+  h1 { font-size: 21px; line-height: 1.45; margin: 6px 0 14px; }
+  .intro p { margin: 0 0 10px; }
+  .sign { text-align: right; color: var(--muted); font-size: 14px; margin-top: 12px; }
+  .preview-note { background: #fff6dd; border: 1px solid #f0d58a; color: #6b5200; font-size: 14px; padding: 10px 14px; border-radius: 10px; margin-top: 12px; }
+
+  section.part { margin-top: 22px; }
+  .part-title { font-size: 15px; font-weight: 700; color: var(--accent); margin: 0 4px 10px; }
+
+  .q { background: var(--card); border-radius: var(--radius); padding: 18px 18px 16px; margin-bottom: 12px; border: 2px solid transparent; }
+  .q.missing { border-color: var(--warn); background: var(--warn-soft); }
+  .q-title { font-weight: 600; margin: 0 0 12px; }
+  .q-title .req { color: var(--warn); margin-left: 2px; }
+  .missing-tip { display: none; color: var(--warn); font-size: 13px; margin-top: 8px; }
+  .q.missing .missing-tip { display: block; }
+
+  .options { display: grid; gap: 8px; }
+  .options.inline { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .opt { position: relative; }
+  .opt input { position: absolute; opacity: 0; pointer-events: none; }
+  .opt label {
+    display: flex; align-items: center; gap: 10px; min-height: 46px;
+    padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; cursor: pointer;
+    background: #fff; transition: border-color .15s, background .15s;
+  }
+  .opt label::before {
+    content: ""; flex: none; width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid #9aa6b6; background: #fff;
+  }
+  .opt input:checked + label { border-color: var(--accent); background: var(--accent-soft); }
+  .opt input:checked + label::before { border-color: var(--accent); box-shadow: inset 0 0 0 4px #fff; background: var(--accent); }
+  .opt input:focus-visible + label { outline: 3px solid #9cc0ea; outline-offset: 2px; }
+
+  .sub { padding-top: 12px; margin-top: 12px; border-top: 1px dashed var(--line); }
+  .sub:first-of-type { border-top: 0; margin-top: 0; padding-top: 0; }
+  .sub.missing .sub-title { color: var(--warn); }
+  .sub-title { font-size: 15px; margin: 0 0 8px; }
+
+  .likert { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .likert .opt label {
+    flex-direction: column; justify-content: center; gap: 4px; text-align: center;
+    min-height: 64px; padding: 8px 2px; font-size: 13px; line-height: 1.3; white-space: pre-line;
+  }
+  .likert .opt label::before { width: 16px; height: 16px; }
+  .scale-hint { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .submit-area { margin-top: 20px; }
+  button.submit {
+    width: 100%; min-height: 52px; border: 0; border-radius: 12px; background: var(--accent); color: #fff;
+    font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit;
+  }
+  button.submit:disabled { opacity: .6; cursor: wait; }
+  .error-msg { color: var(--warn); font-size: 14px; margin-top: 10px; text-align: center; min-height: 1em; }
+
+  .done { background: var(--card); border-radius: var(--radius); padding: 32px 22px; margin-top: 24px; text-align: center; border-top: 5px solid var(--accent); }
+  .done h2 { margin: 0 0 10px; font-size: 22px; }
+  .result { display: inline-block; margin: 16px 0 6px; padding: 14px 22px; border-radius: 12px; background: var(--accent-soft); }
+  .result strong { font-size: 24px; color: var(--accent); display: block; }
+  .small { font-size: 13px; color: var(--muted); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="progress" id="progress">
+    <div class="progress-row"><span>填答進度</span><span id="progressText">0 / 21</span></div>
+    <div class="bar"><span id="progressBar"></span></div>
+  </div>
+
+  <main id="survey">
+    <header class="intro">
+      <div class="school">國立臺北商業大學 企業管理系 企業實務專題</div>
+      <h1>青年族群投資理財與購屋、退休規劃問卷</h1>
+      <p>您好：</p>
+      <p>我們是國立臺北商業大學企業管理系的學生，正在進行「青年族群的資產配置抉擇：購屋與退休需求的干擾效果」專題研究，想了解青年族群的投資偏好與購屋、退休規劃之想法。本問卷採匿名方式填答，所得資料僅供學術研究使用，絕不對外公開，請您依實際情況放心填寫。填答時間約5分鐘，感謝您的協助！</p>
+      <div class="sign">指導教授：閻瑞彥 教授<br>學生：許維州、倪嘉俊、陳紘國 敬上</div>
+      <div class="preview-note" id="previewNote" hidden>預覽模式：目前是在電腦上直接開啟檔案，送出後不會存到試算表。部署到 Google Apps Script 後才會正式回收。</div>
+    </header>
+    <form id="form" novalidate></form>
+    <div class="submit-area">
+      <button type="button" class="submit" id="submitBtn">送出問卷</button>
+      <div class="error-msg" id="errorMsg" role="alert"></div>
+    </div>
+  </main>
+
+  <section class="done" id="done" hidden>
+    <h2>感謝您的填答！</h2>
+    <p>您的回覆已成功送出。</p>
+    <div class="result" id="resultBox" hidden>
+      <span class="small">依本問卷計分，您的投資風險屬性為</span>
+      <strong id="resultType"></strong>
+      <span class="small" id="resultScore"></span>
+    </div>
+    <p class="small">風險屬性僅供參考，不構成任何投資建議。</p>
+  </section>
+
+  <section class="done" id="already" hidden>
+    <h2>您已填答過本問卷</h2>
+    <p>每人限填一次，感謝您的協助！</p>
+  </section>
+</div>
+
+<script>
+  // 題目設定：選項順序需與 Code.gs 的 RISK_SCORES / CHOICE_COUNTS 一致
+  const LIKERT = ['非常\n不符合', '不符合', '尚可', '符合', '非常\n符合'];
+  const PARTS = [
+    { title: '第一部分：個人基本屬性', items: [
+      { id: 'q1', no: 1, text: '性別', options: ['男', '女'], inline: true },
+      { id: 'q2', no: 2, text: '年齡', options: ['未滿20歲', '20~29歲', '30~34歲', '35~39歲', '40~49歲', '50歲以上'], inline: true },
+      { id: 'q3', no: 3, text: '婚姻狀況', options: ['未婚', '已婚', '其他'], inline: true },
+      { id: 'q4', no: 4, text: '您本人或配偶目前是否擁有自有住宅？', options: ['是', '否'], inline: true },
+      { id: 'q5', no: 5, text: '您目前是否有投資經驗（如股票、基金、ETF等）？', options: ['有', '無'], inline: true }
+    ]},
+    { title: '第二部分：風險屬性評估', items: [
+      { id: 'q6', no: 6, text: '您的個人年收入？', options: ['未達50萬元', '50萬以上~180萬元（未達）', '180萬元以上'] },
+      { id: 'q7', no: 7, text: '您的所得主要來源？（擇一）', options: ['無收入', '利息收入', '租金收入', '薪資所得', '投資收入或其他'] },
+      { id: 'q8', no: 8, text: '您的預估投資金額？', options: ['未達50萬元', '50萬以上~300萬元（未達）', '300萬元以上'] },
+      { id: 'q9', no: 9, text: '假設您最初投資為100萬元，當投資滿1年後可接受波動範圍？', options: ['±5萬元', '±5萬元以上~15萬元', '±15萬元以上'] },
+      { id: 'q10', no: 10, text: '就整體而言，您所期望年投資報酬率為何？', options: ['2~5%', '6~10%', '11~20%', '21%以上'], inline: true }
+    ]},
+    { title: '第三部分：投資意願與動機', items: [
+      { no: 11, text: '若未來要進行投資配置，我會傾向選擇下列投資理財工具：', subs: [
+        { id: 'q11a', text: 'a. 銀行定期存款、政府公債、貨幣市場基金' },
+        { id: 'q11b', text: 'b. 投資等級債券ETF、全球債券型基金' },
+        { id: 'q11c', text: 'c. 高股息ETF（如00878）、平衡型基金' },
+        { id: 'q11d', text: 'd. 市值型ETF（如0050）、國內外個股' },
+        { id: 'q11e', text: 'e. 槓桿型標的（如0050正二、反一）、期貨、權證' }
+      ]},
+      { id: 'q12', no: 12, text: '在我的長期生涯規劃中（如獨立生活、成家或安定），擁有一間屬於自己的房屋是重要的目標。', likert: true },
+      { id: 'q13', no: 13, text: '當前房價與個人所得的背離，讓我對未來的購屋能力感到焦慮。', likert: true },
+      { id: 'q14', no: 14, text: '我預計在未來5年內購買自有住宅。', likert: true },
+      { id: 'q15', no: 15, text: '想到未來退休後的生活開銷（含醫療與照護費用），我會感到經濟上的焦慮。', likert: true },
+      { id: 'q16', no: 16, text: '我認為透過長期資產累積以因應老年生活風險，是我目前儲蓄與投資的核心動機。', likert: true },
+      { id: 'q17', no: 17, text: '我認為現在就開始準備退休資金是必要的。', likert: true }
+    ]}
+  ];
+
+  const STORE_KEY = 'zt-survey-2026-submitted';
+  const startedAt = Date.now();
+  // 放在 GitHub Pages 時，資料以不帶 Google 登入資訊的方式送到 Apps Script 後台（doPost）
+  const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyWJWQsjwBQosdFbkh70gA4c--lFuHo-21UFLhn5GNmT3pkYfFztmVGYs3FoLUietGS/exec';
+  const isAppsScript = typeof google !== 'undefined' && google.script && google.script.run;
+  const isPreview = !isAppsScript && (location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+  const form = document.getElementById('form');
+  const allIds = [];
+
+  function storageGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function storageSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+  function el(tag, attrs, text) {
+    const n = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(k => n.setAttribute(k, attrs[k]));
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function radioGroup(id, options, className) {
+    const wrap = el('div', { class: className, role: 'radiogroup' });
+    options.forEach((label, i) => {
+      const opt = el('div', { class: 'opt' });
+      const input = el('input', { type: 'radio', name: id, id: id + '_' + i, value: String(i) });
+      const lab = el('label', { for: id + '_' + i }, label);
+      opt.append(input, lab);
+      wrap.appendChild(opt);
+    });
+    allIds.push(id);
+    return wrap;
+  }
+
+  function likertGroup(id) {
+    const g = radioGroup(id, LIKERT, 'likert');
+    g.querySelectorAll('input').forEach((inp, i) => inp.value = String(i + 1));
+    return g;
+  }
+
+  function titleNode(no, text) {
+    const t = el('p', { class: 'q-title' }, no + '. ' + text);
+    t.appendChild(el('span', { class: 'req', 'aria-hidden': 'true' }, '*'));
+    return t;
+  }
+
+  PARTS.forEach(part => {
+    const sec = el('section', { class: 'part' });
+    sec.appendChild(el('h2', { class: 'part-title' }, part.title));
+    part.items.forEach(item => {
+      const box = el('div', { class: 'q' });
+      box.appendChild(titleNode(item.no, item.text));
+      if (item.subs) {
+        box.dataset.ids = item.subs.map(s => s.id).join(',');
+        item.subs.forEach(s => {
+          const sub = el('div', { class: 'sub', 'data-id': s.id });
+          sub.appendChild(el('p', { class: 'sub-title' }, s.text));
+          sub.appendChild(likertGroup(s.id));
+          box.appendChild(sub);
+        });
+      } else if (item.likert) {
+        box.dataset.ids = item.id;
+        box.appendChild(likertGroup(item.id));
+      } else {
+        box.dataset.ids = item.id;
+        box.appendChild(radioGroup(item.id, item.options, item.inline ? 'options inline' : 'options'));
+      }
+      box.appendChild(el('div', { class: 'missing-tip' }, '此題尚未作答'));
+      sec.appendChild(box);
+    });
+    form.appendChild(sec);
+  });
+
+  function answered(id) { return !!form.querySelector('input[name="' + id + '"]:checked'); }
+
+  function updateProgress() {
+    const n = allIds.filter(answered).length;
+    document.getElementById('progressText').textContent = n + ' / ' + allIds.length;
+    document.getElementById('progressBar').style.width = (n / allIds.length * 100) + '%';
+  }
+
+  form.addEventListener('change', e => {
+    const box = e.target.closest('.q');
+    if (box && box.classList.contains('missing')) {
+      const ids = box.dataset.ids.split(',');
+      if (ids.every(answered)) box.classList.remove('missing');
+      const sub = e.target.closest('.sub');
+      if (sub) sub.classList.remove('missing');
+    }
+    updateProgress();
+  });
+
+  function collect() {
+    const choices = {}, texts = {}, likert = {};
+    PARTS.forEach(p => p.items.forEach(item => {
+      if (item.subs) item.subs.forEach(s => likert[s.id] = Number(valueOf(s.id)));
+      else if (item.likert) likert[item.id] = Number(valueOf(item.id));
+      else { const i = Number(valueOf(item.id)); choices[item.id] = i; texts[item.id] = item.options[i]; }
+    }));
+    return { choices, texts, likert };
+  }
+  function valueOf(id) { const c = form.querySelector('input[name="' + id + '"]:checked'); return c ? c.value : null; }
+
+  function makeId() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+  }
+
+  function showDone(res) {
+    document.getElementById('survey').hidden = true;
+    document.getElementById('progress').hidden = true;
+    document.getElementById('done').hidden = false;
+    if (res && res.type) {
+      document.getElementById('resultBox').hidden = false;
+      document.getElementById('resultType').textContent = res.type;
+      document.getElementById('resultScore').textContent = '（' + res.total + ' 分）';
+    }
+    window.scrollTo(0, 0);
+  }
+  function showAlready() {
+    document.getElementById('survey').hidden = true;
+    document.getElementById('progress').hidden = true;
+    document.getElementById('already').hidden = false;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  const errorMsg = document.getElementById('errorMsg');
+
+  btn.addEventListener('click', () => {
+    errorMsg.textContent = '';
+    let firstMissing = null;
+    form.querySelectorAll('.q').forEach(box => {
+      const ids = box.dataset.ids.split(',');
+      const miss = ids.filter(id => !answered(id));
+      box.classList.toggle('missing', miss.length > 0);
+      box.querySelectorAll('.sub').forEach(s => s.classList.toggle('missing', miss.includes(s.dataset.id)));
+      if (miss.length && !firstMissing) firstMissing = box;
+    });
+    if (firstMissing) {
+      errorMsg.textContent = '還有題目尚未作答，請完成標示紅框的題目。';
+      firstMissing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const payload = collect();
+    payload.clientId = storageGet(STORE_KEY + '-id') || makeId();
+    storageSet(STORE_KEY + '-id', payload.clientId);
+    payload.seconds = Math.round((Date.now() - startedAt) / 1000);
+
+    btn.disabled = true; btn.textContent = '送出中…';
+
+    if (isPreview) {
+      // 預覽模式：本機計分示範，不會存檔
+      const S = { q6: [3, 9, 15], q7: [0, 3, 7, 11, 15], q8: [4, 12, 20], q9: [5, 15, 25], q10: [5, 12, 18, 25] };
+      const total = Object.keys(S).reduce((a, k) => a + S[k][payload.choices[k]], 0);
+      const type = total <= 46 ? '保守型' : total <= 73 ? '穩健型' : '成長型';
+      console.log('預覽模式送出資料', payload);
+      setTimeout(() => showDone({ total, type }), 400);
+      return;
+    }
+
+    function onResult(res) {
+      if (res && res.ok) { storageSet(STORE_KEY, '1'); showDone(res); }
+      else if (res && res.reason === 'duplicate') { storageSet(STORE_KEY, '1'); showAlready(); }
+      else onFail(res && res.message);
+    }
+    function onFail(message) {
+      btn.disabled = false; btn.textContent = '送出問卷';
+      errorMsg.textContent = '送出失敗：' + (message || '請檢查網路後再試一次。');
+    }
+
+    if (isAppsScript) {
+      google.script.run
+        .withSuccessHandler(onResult)
+        .withFailureHandler(err => onFail(err && err.message))
+        .submitResponse(payload);
+      return;
+    }
+
+    fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+      credentials: 'omit',
+      redirect: 'follow'
+    })
+      .then(r => r.json())
+      .then(onResult)
+      .catch(() => onFail());
+  });
+
+  if (isPreview) document.getElementById('previewNote').hidden = false;
+  if (storageGet(STORE_KEY) === '1') showAlready();
+  updateProgress();
+</script>
+</body>
+</html>
