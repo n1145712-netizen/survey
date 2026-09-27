@@ -150,10 +150,10 @@
       { id: 'q5', no: 5, text: '您目前是否有投資經驗（如股票、基金、ETF等）？', options: ['有', '無'], inline: true }
     ]},
     { title: '第二部分：風險屬性評估', items: [
-      { id: 'q6', no: 6, text: '您的個人年收入？', options: ['未達50萬元', '50萬以上~180萬元（未達）', '180萬元以上'] },
-      { id: 'q7', no: 7, text: '您的所得主要來源？（擇一）', options: ['無收入', '利息收入', '租金收入', '薪資所得', '投資收入或其他'] },
-      { id: 'q8', no: 8, text: '您的預估投資金額？', options: ['未達50萬元', '50萬以上~300萬元（未達）', '300萬元以上'] },
-      { id: 'q9', no: 9, text: '假設您最初投資為100萬元，當投資滿1年後可接受波動範圍？', options: ['±5萬元', '±5萬元以上~15萬元', '±15萬元以上'] },
+      { id: 'q6', no: 6, text: '您的個人年收入？', options: ['未達50萬元', '50萬以上~100萬元（未達）', '100萬以上~150萬元（未達）', '150萬以上~200萬元（未達）', '200萬元以上'] },
+      { id: 'q7', no: 7, text: '您的備用金（現金及存款）相當於幾個月的生活開銷？', options: ['無備用金或無須負擔生活開銷', '3個月以下', '超過3個月~6個月（未達）', '6個月以上~1年（未達）', '1年以上~3年（未達）', '3年以上'] },
+      { id: 'q8', no: 8, text: '您每年可用於投資的金額？', options: ['未達50萬元', '50萬以上~100萬元（未達）', '100萬以上~300萬元（未達）', '300萬元以上'] },
+      { id: 'q9', no: 9, text: '若您的投資在一年內出現虧損，您可承受的最大虧損幅度為何？', options: ['無法接受虧損', '-5%', '-10%', '-15%', '-20%以上'] },
       { id: 'q10', no: 10, text: '就整體而言，您所期望年投資報酬率為何？', options: ['2~5%', '6~10%', '11~20%', '21%以上'], inline: true }
     ]},
     { title: '第三部分：投資意願與動機', items: [
@@ -173,7 +173,8 @@
     ]}
   ];
 
-  const STORE_KEY = 'zt-survey-2026-submitted';
+  // 0927 正式版換新的 key：試填過舊版的人也能再填正式版
+  const STORE_KEY = 'zt-survey-2026-v0927-submitted';
   const startedAt = Date.now();
   // 放在 GitHub Pages 時，資料以不帶 Google 登入資訊的方式送到 Apps Script 後台（doPost）
   const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyWJWQsjwBQosdFbkh70gA4c--lFuHo-21UFLhn5GNmT3pkYfFztmVGYs3FoLUietGS/exec';
@@ -324,9 +325,9 @@
 
     if (isPreview) {
       // 預覽模式：本機計分示範，不會存檔
-      const S = { q6: [3, 9, 15], q7: [0, 3, 7, 11, 15], q8: [4, 12, 20], q9: [5, 15, 25], q10: [5, 12, 18, 25] };
+      const S = { q6: [0, 4, 8, 12, 16], q7: [0, 3, 6, 9, 12, 15], q8: [0, 7, 14, 21], q9: [0, 6, 12, 18, 24], q10: [0, 8, 16, 24] };
       const total = Object.keys(S).reduce((a, k) => a + S[k][payload.choices[k]], 0);
-      const type = total <= 46 ? '保守型' : total <= 73 ? '穩健型' : '成長型';
+      const type = total <= 33 ? '保守型' : total <= 66 ? '穩健型' : '積極型';
       console.log('預覽模式送出資料', payload);
       setTimeout(() => showDone({ total, type }), 400);
       return;
