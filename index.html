@@ -111,6 +111,7 @@
       <p>本問卷旨在了解青年族群的風險屬性與投資意願，以及購屋、退休需求對投資選擇的影響。</p>
       <p>問卷全程匿名，資料僅供學術研究使用，共 21 題，約 5 分鐘，依您的實際情況填寫即可。</p>
       <p>謝謝您的協助！</p>
+      <div class="preview-note" id="inappNote" hidden>您目前可能是在 LINE／IG／FB 等 App 內開啟，送出時可能失敗。建議點右上角選單，選「用瀏覽器開啟」（Chrome 或 Safari）後再填寫。</div>
       <div class="preview-note" id="previewNote" hidden>預覽模式：目前是在電腦上直接開啟檔案，送出後不會存到試算表。部署到 Google Apps Script 後才會正式回收。</div>
     </header>
     <form id="form" novalidate></form>
@@ -332,14 +333,17 @@
       return;
     }
 
+    // 自動重試時，若第一次其實已寫入、重試回「重複」，視為成功（不顯示「已填答過」）
+    let retried = false;
     function onResult(res) {
       if (res && res.ok) { storageSet(STORE_KEY, '1'); showDone(res); }
-      else if (res && res.reason === 'duplicate') { storageSet(STORE_KEY, '1'); showAlready(); }
+      else if (res && res.reason === 'duplicate') { storageSet(STORE_KEY, '1'); retried ? showDone(null) : showAlready(); }
       else onFail(res && res.message);
     }
     function onFail(message) {
       btn.disabled = false; btn.textContent = '送出問卷';
-      errorMsg.textContent = '送出失敗：' + (message || '請檢查網路後再試一次。');
+      errorMsg.textContent = '送出失敗：' + (message ||
+        '請檢查網路後再試一次。若仍失敗，請改用 Chrome 或 Safari 直接開啟問卷網址（不要在 LINE、IG、FB 內開啟），或切換 Wi-Fi／行動網路。');
     }
 
     if (isAppsScript) {
@@ -350,17 +354,36 @@
       return;
     }
 
-    fetch(ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload),
-      credentials: 'omit',
-      redirect: 'follow'
-    })
-      .then(r => r.json())
-      .then(onResult)
-      .catch(() => onFail());
+    // 網路層失敗（沒收到可讀的 JSON）時自動重試，最多共 3 次
+    function attempt(n) {
+      const ctrl = window.AbortController ? new AbortController() : null;
+      const timer = ctrl ? setTimeout(() => ctrl.abort(), 30000) : null;
+      fetch(ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+        credentials: 'omit',
+        redirect: 'follow',
+        signal: ctrl ? ctrl.signal : undefined
+      })
+        .then(r => r.json())
+        .then(res => { clearTimeout(timer); onResult(res); })
+        .catch(() => {
+          clearTimeout(timer);
+          if (n < 3) {
+            retried = true;
+            btn.textContent = '網路不穩，重新嘗試中（' + n + '/2）…';
+            setTimeout(() => attempt(n + 1), 2000 * n);
+          } else onFail();
+        });
+    }
+    attempt(1);
   });
+
+  // App 內建瀏覽器常擋住送出，提醒改用 Chrome／Safari
+  if (/Line\/|FBAN|FBAV|FB_IAB|Instagram|Threads|MicroMessenger|Messenger/i.test(navigator.userAgent)) {
+    document.getElementById('inappNote').hidden = false;
+  }
 
   if (isPreview) document.getElementById('previewNote').hidden = false;
   if (storageGet(STORE_KEY) === '1') showAlready();
