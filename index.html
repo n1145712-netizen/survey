@@ -136,6 +136,10 @@
     <h2>您已填答過本問卷</h2>
     <p>每人限填一次，感謝您的協助！</p>
   </section>
+
+  <section class="done" id="closed" hidden>
+    <h2>本問卷已暫停收件，感謝您的協助！</h2>
+  </section>
 </div>
 
 <script>
@@ -388,6 +392,13 @@
   if (isPreview) document.getElementById('previewNote').hidden = false;
   if (storageGet(STORE_KEY) === '1') showAlready();
   updateProgress();
+
+  // 暫停收件開關：true＝只顯示暫停訊息；要重新開放改成 false（Code.gs 的 SURVEY_CLOSED 也要改）
+  const SURVEY_CLOSED = true;
+  if (SURVEY_CLOSED) {
+    ['survey', 'progress', 'already'].forEach(id => document.getElementById(id).hidden = true);
+    document.getElementById('closed').hidden = false;
+  }
 </script>
 </body>
 </html>
